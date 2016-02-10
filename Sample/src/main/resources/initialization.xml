@@ -1,0 +1,31 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--Setting Database connection-->
+    <bean id="OAuthDatabase" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.OAUTH.driverClassName}"/>
+        <property name="url" value="${jdbc.OAUTH.url}?useUnicode=true&amp;characterEncoding=UTF-8"/>
+        <property name="username" value="${jdbc.OAUTH.username}"/>
+        <property name="password" value="${jdbc.OAUTH.password}"/>
+    </bean>
+
+    <!--Construct Mysql class with datasource-->
+    <bean id="OAuthDataSourceLibrary"
+          class="lk.dialog.ideabiz.library.APICall.DataProvider.MySQLCredentialProviderImpl">
+        <property name="AuthDataSource" ref="OAuthDatabase"/>
+    </bean>
+
+    <!--Construct API call library.  -->
+    <bean id="IdeabizAPICall" class="lk.dialog.ideabiz.library.APICall.APICall">
+        <constructor-arg value="${application.http.timeout}"/>
+        <constructor-arg ref="OAuthDataSourceLibrary"/>
+    </bean>
+
+    <!--Constract library manager for shared libs-->
+    <bean id="LibraryManager" class="lk.dialog.ideabiz.library.LibraryManager">
+        <property name="apiCall" ref="IdeabizAPICall"/>
+    </bean>
+</beans>

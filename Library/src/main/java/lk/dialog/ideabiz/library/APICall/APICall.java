@@ -1,7 +1,7 @@
 package lk.dialog.ideabiz.library.APICall;
 
 import com.google.gson.Gson;
-import lk.dialog.ideabiz.library.APICall.DataProvider.DataProviderInterface;
+import lk.dialog.ideabiz.library.APICall.DataProvider.IdeabizOAuthDataProviderInterface;
 import lk.dialog.ideabiz.library.model.APICall.APICallResponse;
 import lk.dialog.ideabiz.library.model.APICall.OAuth2Model;
 import org.apache.log4j.Logger;
@@ -193,10 +193,14 @@ public class APICall {
         return r;
     }
 
-
-    public APICall(Integer timeout, DataProviderInterface dataProviderInterface) {
+    /***
+     *
+     * @param timeout
+     * @param ideabizOAuthDataProviderInterface
+     */
+    public APICall(Integer timeout, IdeabizOAuthDataProviderInterface ideabizOAuthDataProviderInterface) {
         this.timeout = timeout;
-        this.oAuth = new OAuth2Handler(dataProviderInterface, this);
+        this.oAuth = new OAuth2Handler(ideabizOAuthDataProviderInterface, this);
         this.gson = new Gson();
 
     }

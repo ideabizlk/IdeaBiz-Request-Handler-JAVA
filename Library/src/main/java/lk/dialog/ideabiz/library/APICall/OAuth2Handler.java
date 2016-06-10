@@ -1,7 +1,7 @@
 package lk.dialog.ideabiz.library.APICall;
 
 import com.google.gson.Gson;
-import lk.dialog.ideabiz.library.APICall.DataProvider.DataProviderInterface;
+import lk.dialog.ideabiz.library.APICall.DataProvider.IdeabizOAuthDataProviderInterface;
 import lk.dialog.ideabiz.library.model.APICall.APICallResponse;
 import lk.dialog.ideabiz.library.model.APICall.OAuth2Model;
 import lk.dialog.ideabiz.library.model.APICall.OAuth2RefreshResponse;
@@ -16,7 +16,7 @@ import java.util.HashMap;
 class OAuth2Handler {
     Logger logger;
     Gson gson;
-    DataProviderInterface dataProvider;
+    IdeabizOAuthDataProviderInterface ideabizOAuthDataProviderInterface;
     APICall apicall;
 
     /***
@@ -25,8 +25,8 @@ class OAuth2Handler {
      * @return
      * @throws Exception
      */
-    public OAuth2Model refreshToken(int id) throws Exception {
-        OAuth2Model oAuth2Model = dataProvider.getToken(id);
+    public synchronized OAuth2Model refreshToken(int id) throws Exception {
+        OAuth2Model oAuth2Model = ideabizOAuthDataProviderInterface.getToken(id);
         if (oAuth2Model == null)
             throw new Exception("Cant find auth for ID");
 
@@ -42,7 +42,7 @@ class OAuth2Handler {
         if (apiCallResponse.getStatusCode() == 200) {
 
             OAuth2RefreshResponse oAuth2RefreshResponse = gson.fromJson(apiCallResponse.getBody(), OAuth2RefreshResponse.class);
-            dataProvider.updateToken(id, oAuth2RefreshResponse.getAccess_token(), oAuth2RefreshResponse.getRefresh_token(), oAuth2RefreshResponse.getExpires_in());
+            ideabizOAuthDataProviderInterface.updateToken(id, oAuth2RefreshResponse.getAccess_token(), oAuth2RefreshResponse.getRefresh_token(), oAuth2RefreshResponse.getExpires_in());
             oAuth2Model.setAccessToken(oAuth2RefreshResponse.getAccess_token());
             oAuth2Model.setRefreshToken(oAuth2RefreshResponse.getRefresh_token());
             oAuth2Model.setExpire(Long.parseLong(oAuth2RefreshResponse.getExpires_in()));
@@ -54,18 +54,18 @@ class OAuth2Handler {
 
     }
 
-    public DataProviderInterface getDataProvider() {
-        return dataProvider;
+    public IdeabizOAuthDataProviderInterface getDataProvider() {
+        return ideabizOAuthDataProviderInterface;
     }
 
-    public void setDataProvider(DataProviderInterface dataProvider) {
-        this.dataProvider = dataProvider;
+    public void setDataProvider(IdeabizOAuthDataProviderInterface dataProvider) {
+        this.ideabizOAuthDataProviderInterface = dataProvider;
     }
 
-    public OAuth2Handler(DataProviderInterface dataProvider, APICall apicall) {
+    public OAuth2Handler(IdeabizOAuthDataProviderInterface ideabizOAuthDataProviderInterface, APICall apicall) {
         this.logger = Logger.getLogger(OAuth2Handler.class);
         this.gson = new Gson();
-        this.dataProvider = dataProvider;
+        this.ideabizOAuthDataProviderInterface = ideabizOAuthDataProviderInterface;
         this.apicall = apicall;
     }
 

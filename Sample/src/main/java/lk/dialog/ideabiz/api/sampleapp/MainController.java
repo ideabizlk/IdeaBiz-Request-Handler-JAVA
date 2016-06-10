@@ -2,17 +2,21 @@ package lk.dialog.ideabiz.api.sampleapp;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import lk.dialog.ideabiz.api.model.common.sms.InboundSMSRequestWrap;
-import lk.dialog.ideabiz.api.model.common.sms.OutboundSMSMessageRequest;
-import lk.dialog.ideabiz.api.model.common.sms.OutboundSMSMessagingRequestWrap;
+import lk.dialog.ideabiz.api.model.common.sms.Inbound.InboundSMSRequestWrap;
+import lk.dialog.ideabiz.api.model.common.sms.Outbound.OutboundSMSMessageRequest;
+import lk.dialog.ideabiz.api.model.common.sms.Outbound.OutboundSMSMessagingRequestWrap;
+import lk.dialog.ideabiz.library.APICall.APICall;
+import lk.dialog.ideabiz.library.APICall.DataProvider.MySQLIdeabizOAuthDataProviderImpl;
 import lk.dialog.ideabiz.library.LibraryManager;
 import lk.dialog.ideabiz.library.model.APICall.APICallResponse;
 import org.apache.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.activation.DataSource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +49,7 @@ public class MainController {
         //Creating outbound request
         OutboundSMSMessagingRequestWrap outboundSMSMessagingRequestWrap = new OutboundSMSMessagingRequestWrap();
         OutboundSMSMessageRequest outboundSMSMessageRequest = new OutboundSMSMessageRequest(
-                "tel:" + inboundSMSRequestWrap.getInboundSMSMessageNotification().getInboundSMSMessage().getSenderAddress(),
+                inboundSMSRequestWrap.getInboundSMSMessageNotification().getInboundSMSMessage().getSenderAddress(),
                 inboundSMSRequestWrap.getInboundSMSMessageNotification().getInboundSMSMessage().getMessage(), "tel:7555", "7555");
         outboundSMSMessagingRequestWrap.setOutboundSMSMessageRequest(outboundSMSMessageRequest);
 
@@ -53,6 +57,8 @@ public class MainController {
         Map<String, String> header = new HashMap<String, String>();
         header.put("Content-Type", "application/json");
         header.put("Accept", "application/json");
+
+
 
         //Sending API call
         APICallResponse response = null;
@@ -64,6 +70,34 @@ public class MainController {
         }
         return new ResponseEntity<String>(gson.toJson(response), HttpStatus.OK);
 
+    }
+
+    public void sampleWithoutXMLBean(){
+        //Setup Data Source
+        DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
+        driverManagerDataSource.setDriverClassName("com.mysql.jdbc.Driver");
+        driverManagerDataSource.setUrl("jdbc:mysql://localhost:3306/sampleapp");
+        driverManagerDataSource.setUsername("user");
+        driverManagerDataSource.setPassword("password");
+
+        //Create OAuth Data Provider
+        MySQLIdeabizOAuthDataProviderImpl mySQLIdeabizOAuthDataProvider =new MySQLIdeabizOAuthDataProviderImpl();
+        mySQLIdeabizOAuthDataProvider.setAuthDataSource(driverManagerDataSource);
+
+        //Construct API Call
+        APICall apiCall = new APICall(3000,mySQLIdeabizOAuthDataProvider);
+
+        //Setting headers
+        Map<String, String> header = new HashMap<String, String>();
+        header.put("Content-Type", "application/json");
+        header.put("Accept", "application/json");
+
+        try {
+            //Send API Call
+            apiCall.sendAuthAPICall(1, "https://ideabiz.lk/apicall/api/url/here", "POST", header, "{SAMPLE BODY}", false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }

@@ -14,7 +14,7 @@
 
     <!--Construct Mysql class with datasource-->
     <bean id="OAuthDataSourceLibrary"
-          class="lk.dialog.ideabiz.library.APICall.DataProvider.MySQLCredentialProviderImpl">
+          class="lk.dialog.ideabiz.library.APICall.DataProvider.MySQLIdeabizOAuthDataProviderImpl">
         <property name="AuthDataSource" ref="OAuthDatabase"/>
     </bean>
 
@@ -24,7 +24,7 @@
         <constructor-arg ref="OAuthDataSourceLibrary"/>
     </bean>
 
-    <!--Constract library manager for shared libs-->
+    <!--Construct library manager for shared libs-->
     <bean id="LibraryManager" class="lk.dialog.ideabiz.library.LibraryManager">
         <property name="apiCall" ref="IdeabizAPICall"/>
     </bean>

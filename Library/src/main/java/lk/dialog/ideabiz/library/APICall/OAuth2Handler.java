@@ -21,6 +21,7 @@ class OAuth2Handler {
 
     /***
      * refresh the token
+     *
      * @param id
      * @return
      * @throws Exception
@@ -36,17 +37,26 @@ class OAuth2Handler {
         APICallResponse apiCallResponse = apicall.sendAPICall(oAuth2Model.getTokenURL() + "?grant_type=refresh_token&refresh_token=" + oAuth2Model.getRefreshToken() + "&scope=" + oAuth2Model.getScope(),
                 "POST", headers, null, false);
 
-        logger.info("Refresh :" + id + ":" + apiCallResponse.getStatusCode() );
+        logger.info("Refresh :" + id + ":" + apiCallResponse.getStatusCode());
         logger.debug("Refresh :" + apiCallResponse.getBody());
 
         if (apiCallResponse.getStatusCode() == 200) {
+            try {
+                OAuth2RefreshResponse oAuth2RefreshResponse = gson.fromJson(apiCallResponse.getBody(), OAuth2RefreshResponse.class);
+                if (oAuth2RefreshResponse != null && oAuth2RefreshResponse.getAccess_token() != null && oAuth2Model.getAccessToken().length() > 1) {
+                    ideabizOAuthDataProviderInterface.updateToken(id, oAuth2RefreshResponse.getAccess_token(), oAuth2RefreshResponse.getRefresh_token(), oAuth2RefreshResponse.getExpires_in());
+                    oAuth2Model.setAccessToken(oAuth2RefreshResponse.getAccess_token());
+                    oAuth2Model.setRefreshToken(oAuth2RefreshResponse.getRefresh_token());
+                    oAuth2Model.setExpire(Long.parseLong(oAuth2RefreshResponse.getExpires_in()));
+                    return oAuth2Model;
+                } else {
+                    throw new Exception("Refreshing token error : Invalid response");
+                }
 
-            OAuth2RefreshResponse oAuth2RefreshResponse = gson.fromJson(apiCallResponse.getBody(), OAuth2RefreshResponse.class);
-            ideabizOAuthDataProviderInterface.updateToken(id, oAuth2RefreshResponse.getAccess_token(), oAuth2RefreshResponse.getRefresh_token(), oAuth2RefreshResponse.getExpires_in());
-            oAuth2Model.setAccessToken(oAuth2RefreshResponse.getAccess_token());
-            oAuth2Model.setRefreshToken(oAuth2RefreshResponse.getRefresh_token());
-            oAuth2Model.setExpire(Long.parseLong(oAuth2RefreshResponse.getExpires_in()));
-            return oAuth2Model;
+            } catch (Exception e) {
+                throw new Exception("Refreshing token error: " + apiCallResponse.getError().getMessage());
+            }
+
         } else {
             logger.error("Refreshing token error.:" + apiCallResponse.getError().getMessage());
             throw new Exception("Refreshing token error: " + apiCallResponse.getError().getMessage());

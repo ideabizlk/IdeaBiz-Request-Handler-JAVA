@@ -7,15 +7,17 @@ This project All object created on XML.
 * Maven install bellow projects
 
 	Ideabiz-APICallHandler (https://github.com/ideabizlk/IdeaBiz-Request-Handler-JAVA)
+	
 	ideabiz-common-java-class (https://github.com/ideabizlk/Classes-JAVA)
+	
 * Run `Database.sql` on mysql DB
-* Create Ideabiz App
+* Create Ideabiz App on ideabiz.lk
 * Subscribe for relevent API's (SMS for this sample)
 * Generate `consumer key`, `consumer secret`, `refresh token`, `access token` 
 * add above to newly created table
 * config `database.properties`
 * Deply project on tomcat or run as meven goal `jetty:run` (this project can run independently with IDE)
-* Send SMS inboud API call to `{serverURL}/inbound/inbound/SMS
+* Send SMS inboud API call to `{serverURL}/inbound/inbound/SMS`
 
 	
 ### DB Config
@@ -54,6 +56,32 @@ jdbc.OAUTH.password=password
     <bean id="LibraryManager" class="lk.dialog.ideabiz.library.LibraryManager">
         <property name="apiCall" ref="IdeabizAPICall"/>
     </bean>
+```
+
+### Inbound SMS Request 
+
+DOC (http://docs.ideabiz.lk/en/APIs/SMS)
+
+Send  `POST` Bellow request
+
+URL 
+```
+{serverURL}/inbound/inbound/SMS
+```
+
+BODY
+```
+{
+  "inboundSMSMessageNotification": {
+    "inboundSMSMessage": {
+      "dateTime": "",
+      "destinationAddress": "tel:87711",
+      "messageId": "113883",
+      "message": "My message",
+      "senderAddress": "tel:+94777123456"
+    }
+  }
+}
 ```
 
 ### Without Bean XML can use

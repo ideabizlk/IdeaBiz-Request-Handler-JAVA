@@ -6,7 +6,7 @@
 
     <groupId>lk.dialog.ideabiz.sampleapp</groupId>
     <artifactId>java-class-sampleapp</artifactId>
-    <version>1.0</version>
+    <version>3.0</version>
     <name>ideabiz-apicall-sample</name>
     <packaging>war</packaging>
 
@@ -76,9 +76,9 @@
             <version>${mysql.version}</version>
         </dependency>
         <dependency>
-            <groupId>lk.dialog.ideabiz.library.APICallHandler</groupId>
+            <groupId>lk.ideabiz.library.APICallHandler</groupId>
             <artifactId>Ideabiz-APICallHandler</artifactId>
-            <version>1.0</version>
+            <version>3.0</version>
         </dependency>
         <dependency>
             <groupId>lk.dialog.ideabiz.library.javaclass</groupId>

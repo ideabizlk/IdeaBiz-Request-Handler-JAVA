@@ -9,6 +9,8 @@ public class OAuth2Model {
     String refreshToken;
     String consumerKey;
     String consumerSecret;
+    String username;
+    String password;
     String scope;
     long expire;
     String tokenURL;
@@ -84,5 +86,28 @@ public class OAuth2Model {
 
     public void setLastUpdated(String lastUpdated) {
         this.lastUpdated = lastUpdated;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public boolean canCreateAccessToken(){
+        if(username==null || username.equalsIgnoreCase("null") || username.trim().length()<5){
+            return false;
+        }
+        return true;
     }
 }

@@ -8,6 +8,7 @@ import lk.dialog.ideabiz.library.model.APICall.OAuth2RefreshResponse;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.log4j.Logger;
 
+import java.net.URLEncoder;
 import java.util.HashMap;
 
 /**
@@ -56,12 +57,50 @@ class OAuth2Handler {
             } catch (Exception e) {
                 throw new Exception("Refreshing token error: " + apiCallResponse.getError().getMessage());
             }
+        } else if (apiCallResponse.getStatusCode() == 400 && oAuth2Model.canCreateAccessToken() && apiCallResponse.getBody().contains("invalid_grant")) {
+            oAuth2Model = createNewAccessToken(oAuth2Model);
+            return oAuth2Model;
 
         } else {
             logger.error("Refreshing token error.:" + apiCallResponse.getError().getMessage());
             throw new Exception("Refreshing token error: " + apiCallResponse.getError().getMessage());
         }
 
+    }
+
+    public synchronized OAuth2Model createNewAccessToken(OAuth2Model oAuth2Model) throws Exception {
+
+
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put("Authorization", "Basic " + base64Encode(oAuth2Model.getConsumerKey() + ":" + oAuth2Model.getConsumerSecret()));
+
+        APICallResponse apiCallResponse = apicall.sendAPICall(oAuth2Model.getTokenURL() + "?grant_type=password&username=" + URLEncoder.encode(oAuth2Model.getUsername()) + "&password=" + URLEncoder.encode(oAuth2Model.getPassword()) + "&scope=" + oAuth2Model.getScope(),
+                "POST", headers, null, false);
+
+        logger.info("Creating new token :" + oAuth2Model.getId() + ":" + apiCallResponse.getStatusCode());
+        logger.debug("Refresh :" + apiCallResponse.getBody());
+
+        if (apiCallResponse.getStatusCode() == 200) {
+            try {
+                OAuth2RefreshResponse oAuth2RefreshResponse = gson.fromJson(apiCallResponse.getBody(), OAuth2RefreshResponse.class);
+                if (oAuth2RefreshResponse != null && oAuth2RefreshResponse.getAccess_token() != null && oAuth2Model.getAccessToken().length() > 1) {
+                    ideabizOAuthDataProviderInterface.updateToken(oAuth2Model.getId(), oAuth2RefreshResponse.getAccess_token(), oAuth2RefreshResponse.getRefresh_token(), oAuth2RefreshResponse.getExpires_in());
+                    oAuth2Model.setAccessToken(oAuth2RefreshResponse.getAccess_token());
+                    oAuth2Model.setRefreshToken(oAuth2RefreshResponse.getRefresh_token());
+                    oAuth2Model.setExpire(Long.parseLong(oAuth2RefreshResponse.getExpires_in()));
+                    return oAuth2Model;
+                } else {
+                    throw new Exception("Creating token error : Invalid response");
+                }
+
+            } catch (Exception e) {
+                throw new Exception("Creating token error: " + apiCallResponse.getError().getMessage());
+            }
+
+        } else {
+            logger.error("Creating token error.:" + apiCallResponse.getError().getMessage());
+            throw new Exception("Creating token error: " + apiCallResponse.getError().getMessage());
+        }
     }
 
     public IdeabizOAuthDataProviderInterface getDataProvider() {

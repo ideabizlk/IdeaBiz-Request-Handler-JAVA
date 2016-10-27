@@ -53,6 +53,15 @@ public class APICall {
                 if (headers == null)
                     headers = new HashMap<String, String>();
                 headers.put("Authorization", "Bearer " + oAuth2Model.getAccessToken());
+            } else if (oAuth2Model.canCreateAccessToken()) {
+                oAuth.createNewAccessToken(oAuth2Model);
+                if (oAuth2Model.getAccessToken() != null && oAuth2Model.getAccessToken().length() > 0) {
+                    if (headers == null)
+                        headers = new HashMap<String, String>();
+                    headers.put("Authorization", "Bearer " + oAuth2Model.getAccessToken());
+                } else {
+                    logger.info("AuthAPICall Failed : No access token for id " + oauthId);
+                }
             } else {
                 logger.info("AuthAPICall Failed : No access token for id " + oauthId);
 
@@ -66,8 +75,14 @@ public class APICall {
             return apiCallResponse;
 
         //Check token expired or not
-        if (apiCallResponse.getStatusCode() == 401 && apiCallResponse.getBody().contains("Expired")) {
-            oAuth2Model = oAuth.refreshToken(oAuth2Model.getId());
+        if (apiCallResponse.getStatusCode() == 401) {
+            if (apiCallResponse.getBody().contains("Expired")) {
+                oAuth2Model = oAuth.refreshToken(oAuth2Model.getId());
+            } else if (apiCallResponse.getBody().contains("Expired")) {
+                oAuth2Model = oAuth.createNewAccessToken(oAuth2Model);
+            } else {
+                return apiCallResponse;
+            }
             headers.put("Authorization", "Bearer " + oAuth2Model.getAccessToken());
             return sendAPICall(url, method, headers, body, async);
         } else {
@@ -194,7 +209,6 @@ public class APICall {
     }
 
     /***
-     *
      * @param timeout
      * @param ideabizOAuthDataProviderInterface
      */
@@ -203,6 +217,10 @@ public class APICall {
         this.oAuth = new OAuth2Handler(ideabizOAuthDataProviderInterface, this);
         this.gson = new Gson();
 
+    }
+
+    public OAuth2Handler getoAuth() {
+        return oAuth;
     }
 
 

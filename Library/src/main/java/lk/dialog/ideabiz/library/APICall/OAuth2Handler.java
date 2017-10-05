@@ -14,7 +14,7 @@ import java.util.HashMap;
 /**
  * Created by Malinda_07654 on 2/7/2016.
  */
-class OAuth2Handler {
+public class OAuth2Handler {
     Logger logger;
     Gson gson;
     IdeabizOAuthDataProviderInterface ideabizOAuthDataProviderInterface;
@@ -35,6 +35,7 @@ class OAuth2Handler {
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("Authorization", "Basic " + base64Encode(oAuth2Model.getConsumerKey() + ":" + oAuth2Model.getConsumerSecret()));
 
+        logger.debug("REFRESH " + id + " , RT :  " + oAuth2Model.getRefreshToken() + " , AT : " + oAuth2Model.getAccessToken() + " , CC : " + oAuth2Model.getConsumerKey());
         APICallResponse apiCallResponse = apicall.sendAPICall(oAuth2Model.getTokenURL() + "?grant_type=refresh_token&refresh_token=" + oAuth2Model.getRefreshToken() + "&scope=" + oAuth2Model.getScope(),
                 "POST", headers, null, false);
 
@@ -73,6 +74,7 @@ class OAuth2Handler {
 
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("Authorization", "Basic " + base64Encode(oAuth2Model.getConsumerKey() + ":" + oAuth2Model.getConsumerSecret()));
+        logger.debug("CREATE " + oAuth2Model.getId() + " , RT :  " + oAuth2Model.getRefreshToken() + " , AT : " + oAuth2Model.getAccessToken() + " , CC : " + oAuth2Model.getConsumerKey());
 
         APICallResponse apiCallResponse = apicall.sendAPICall(oAuth2Model.getTokenURL() + "?grant_type=password&username=" + URLEncoder.encode(oAuth2Model.getUsername()) + "&password=" + URLEncoder.encode(oAuth2Model.getPassword()) + "&scope=" + oAuth2Model.getScope(),
                 "POST", headers, null, false);

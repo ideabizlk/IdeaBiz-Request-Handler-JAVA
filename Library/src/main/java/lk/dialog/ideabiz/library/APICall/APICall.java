@@ -53,12 +53,15 @@ public class APICall {
                 if (headers == null)
                     headers = new HashMap<String, String>();
                 headers.put("Authorization", "Bearer " + oAuth2Model.getAccessToken());
+                logger.debug("USING OAUTH2 : BEARER : " + oauthId + " : " + oAuth2Model.getAccessToken());
             } else if (oAuth2Model.canCreateAccessToken()) {
                 oAuth.createNewAccessToken(oAuth2Model);
                 if (oAuth2Model.getAccessToken() != null && oAuth2Model.getAccessToken().length() > 0) {
                     if (headers == null)
                         headers = new HashMap<String, String>();
                     headers.put("Authorization", "Bearer " + oAuth2Model.getAccessToken());
+                    logger.debug("USING OAUTH2 : BEARER : " + oauthId + " : " + oAuth2Model.getAccessToken());
+
                 } else {
                     logger.info("AuthAPICall Failed : No access token for id " + oauthId);
                 }
@@ -77,13 +80,17 @@ public class APICall {
         //Check token expired or not
         if (apiCallResponse.getStatusCode() == 401) {
             if (apiCallResponse.getBody().contains("Expired")) {
+                logger.debug("Token Expired. Refreshing new");
                 oAuth2Model = oAuth.refreshToken(oAuth2Model.getId());
-            } else if (apiCallResponse.getBody().contains("Expired")) {
+            } else if (apiCallResponse.getBody().contains("Inactive") && oAuth2Model.getUsername() != null && oAuth2Model.getPassword() != null) {
+                logger.debug("Token Inactive. Generating new");
                 oAuth2Model = oAuth.createNewAccessToken(oAuth2Model);
             } else {
                 return apiCallResponse;
             }
             headers.put("Authorization", "Bearer " + oAuth2Model.getAccessToken());
+            logger.debug("USING REFRESHED/RC OAUTH2 : BEARER : " + oauthId + " : " + oAuth2Model.getAccessToken());
+
             return sendAPICall(url, method, headers, body, async);
         } else {
             return apiCallResponse;
@@ -198,6 +205,7 @@ public class APICall {
 
         } catch (Exception e) {
             logger.error("API CALL FAILED " + e.getMessage() + " : " + url);
+            logger.debug("API CALL FAILED ", e);
             r.setError(e);
         }
 

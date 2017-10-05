@@ -15,6 +15,15 @@ public class OAuth2Model {
     long expire;
     String tokenURL;
     String lastUpdated;
+    String note;
+
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
 
     public int getId() {
         return id;
@@ -104,8 +113,8 @@ public class OAuth2Model {
         this.password = password;
     }
 
-    public boolean canCreateAccessToken(){
-        if(username==null || username.equalsIgnoreCase("null") || username.trim().length()<5){
+    public boolean canCreateAccessToken() {
+        if (username == null || username.equalsIgnoreCase("null") || username.trim().length() < 5) {
             return false;
         }
         return true;

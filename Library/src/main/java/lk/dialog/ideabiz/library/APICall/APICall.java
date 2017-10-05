@@ -15,7 +15,7 @@ import java.util.*;
 /**
  * Created by Malinda on 7/13/2015.
  */
-public class APICall {
+    public class APICall {
 
     //Timeout value in ms for APIcall
     int timeout;
@@ -131,7 +131,11 @@ public class APICall {
         long startTime = System.currentTimeMillis();
 
         try {
-            logger.info("Sending request to URL : " + url);
+            String auth = null;
+            auth = (headers.get("Authorization"));
+            if(auth ==null)
+                auth = "NULL";
+            logger.info("Sending request to URL : " + url + " | " + auth) ;
             logger.debug("Post parameters : " + body);
             logger.debug("Headers : " + gson.toJson(headers));
 

@@ -79,10 +79,10 @@ import java.util.*;
 
         //Check token expired or not
         if (apiCallResponse.getStatusCode() == 401) {
-            if (apiCallResponse.getBody().contains("Expired")) {
+            if (apiCallResponse.getBody().contains("Expired") || apiCallResponse.getBody().contains("900903")) {
                 logger.debug("Token Expired. Refreshing new");
                 oAuth2Model = oAuth.refreshToken(oAuth2Model.getId());
-            } else if (apiCallResponse.getBody().contains("Inactive") && oAuth2Model.getUsername() != null && oAuth2Model.getPassword() != null) {
+            } else if ((apiCallResponse.getBody().contains("Inactive") ||  apiCallResponse.getBody().contains("900901") || apiCallResponse.getBody().contains("900904")) && oAuth2Model.getUsername() != null && oAuth2Model.getPassword() != null) {
                 logger.debug("Token Inactive. Generating new");
                 oAuth2Model = oAuth.createNewAccessToken(oAuth2Model);
             } else {

@@ -132,7 +132,11 @@ import java.util.*;
 
         try {
             String auth = null;
-            auth = (headers.get("Authorization"));
+            try{
+                auth = (headers.get("Authorization"));
+            }catch (Exception e){
+
+            }
             if(auth ==null)
                 auth = "NULL";
             logger.info("Sending request to URL : " + url + " | " + auth) ;
